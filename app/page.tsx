@@ -4,15 +4,16 @@ import MainBody from "@/components/mainBody";
 import { fetchAllPokemon } from "@/lib/fetchPokemon";
 import { applyFilters, parseFiltersFromSearchParams } from "@/lib/filterUtils";
 
-export default async function Home({ searchParams = {} }: { searchParams?: { [key: string]: string | string[] } }) {
-  const page = parseInt((searchParams.page as string) || '1');
+export default async function Page({ searchParams }: { searchParams?: Promise<{ [key: string]: string | string[] }> }) {
+  const resolvedSearchParams = searchParams ? await searchParams : {};
+  const page = parseInt((resolvedSearchParams.page as string) || '1');
   const pageSize = 12;
 
   // Fetch all Pokémon (or a reasonable limit)
   const allPokemon = await fetchAllPokemon(300);
 
   // Parse and apply filters
-  const filters = parseFiltersFromSearchParams(searchParams);
+  const filters = parseFiltersFromSearchParams(resolvedSearchParams);
   const filteredPokemon = applyFilters(allPokemon, filters);
 
   // Paginate after filtering
@@ -27,10 +28,10 @@ export default async function Home({ searchParams = {} }: { searchParams?: { [ke
         totalCards={totalCards}
         currentPage={page}
         totalPages={totalPages}
-        searchParams={searchParams}
+        searchParams={resolvedSearchParams}
       />
       <Filter />
-      <Footer currentPage={page} totalPages={totalPages} searchParams={searchParams} />
+      <Footer currentPage={page} totalPages={totalPages} searchParams={resolvedSearchParams} />
     </>
   );
 }
