@@ -4,6 +4,7 @@
 import React from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
+import type { Pokemon } from "@/lib/fetchPokemon";
 
 const typeEmojis: Record<string, string> = {
   fire: "🔥",
@@ -48,7 +49,7 @@ const typeColors: Record<string, string> = {
   flying: "bg-sky-300 text-gray-900",
 };
 
-export default function PokemonCard({ pokemon }: { pokemon: any }) {
+export default function PokemonCard({ pokemon }: { pokemon: Pokemon }) {
   return (
     <Link href={`/pokemon/${pokemon.id}`}>
       <Card className="bg-white border-2 border-gray-400 shadow-none hover:shadow-2xl transition cursor-pointer w-72 h-[26rem] flex flex-col justify-between">

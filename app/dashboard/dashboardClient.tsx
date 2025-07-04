@@ -7,9 +7,10 @@ import Navbar from '@/components/navbar';
 // import PokemonCard from '@/components/pokemonCard';
 // import Link from 'next/link';
 // import PaginationDemo from '@/components/pagination';
+import type { Pokemon } from "@/lib/fetchPokemon";
 
 interface Props {
-  allPokemon: any[];
+  allPokemon: Pokemon[];
   totalCards: number;
   currentPage: number;
   totalPages: number;

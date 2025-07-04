@@ -4,11 +4,7 @@ import MainBody from "@/components/mainBody";
 import { fetchAllPokemon } from "@/lib/fetchPokemon";
 import { applyFilters, parseFiltersFromSearchParams } from "@/lib/filterUtils";
 
-export type PageProps = {
-  searchParams?: { [key: string]: string | string[] };
-};
-
-export default async function Home({ searchParams = {} }: PageProps) {
+export default async function Home({ searchParams = {} }: { searchParams?: { [key: string]: string | string[] } }) {
   const page = parseInt((searchParams.page as string) || '1');
   const pageSize = 12;
 

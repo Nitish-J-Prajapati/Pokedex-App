@@ -1,4 +1,17 @@
-export async function fetchAllPokemon(limit = 300) {
+export interface Pokemon {
+  id: number;
+  name: string;
+  type: string[];
+  image: string;
+  height: number;
+  weight: number;
+  base_experience: number;
+  abilities: string[];
+  stats: { name: string; value: number }[];
+  forms: string[];
+}
+
+export async function fetchAllPokemon(limit = 300): Promise<Pokemon[]> {
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`);
 
@@ -24,7 +37,7 @@ export async function fetchAllPokemon(limit = 300) {
             abilities: details.abilities.map((a: any) => a.ability.name),
             stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
             forms: details.forms.map((f: any) => f.name),
-          };
+          } as Pokemon;
         } catch (err) {
           console.warn(`Skipping ${p.name} due to error:`, err);
           return null;
@@ -33,7 +46,7 @@ export async function fetchAllPokemon(limit = 300) {
     );
 
     // Remove any null entries
-    return detailedPokemon.filter((p) => p !== null);
+    return detailedPokemon.filter((p): p is Pokemon => p !== null);
   } catch (err) {
     console.error('Error fetching all Pokémon:', err);
     return []; // graceful fallback
@@ -47,7 +60,7 @@ export async function fetchTypes() {
   return data.results.map((type: any) => type.name);
 }
 
-export async function fetchPaginatedPokemon(page: number, pageSize: number) {
+export async function fetchPaginatedPokemon(page: number, pageSize: number): Promise<{ pokemon: Pokemon[]; totalCards: number; totalPages: number }> {
   const offset = (page - 1) * pageSize;
   const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${pageSize}&offset=${offset}`);
   const data = await res.json();
@@ -67,7 +80,7 @@ export async function fetchPaginatedPokemon(page: number, pageSize: number) {
         abilities: details.abilities.map((a: any) => a.ability.name),
         stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
         forms: details.forms.map((f: any) => f.name),
-      };
+      } as Pokemon;
     })
   );
 
@@ -77,7 +90,7 @@ export async function fetchPaginatedPokemon(page: number, pageSize: number) {
   return { pokemon, totalCards, totalPages };
 }
 
-export async function fetchPokemonByIdOrName(idOrName: string | number) {
+export async function fetchPokemonByIdOrName(idOrName: string | number): Promise<Pokemon | null> {
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`);
     if (!res.ok) throw new Error(`Failed to fetch Pokémon: ${idOrName}`);
@@ -93,7 +106,7 @@ export async function fetchPokemonByIdOrName(idOrName: string | number) {
       abilities: details.abilities.map((a: any) => a.ability.name),
       stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
       forms: details.forms.map((f: any) => f.name),
-    };
+    } as Pokemon;
   } catch (err) {
     console.error('Error fetching Pokémon:', err);
     return null;

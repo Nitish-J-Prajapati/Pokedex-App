@@ -1,7 +1,8 @@
 import PokemonCard from "./pokemon-card";
+import type { Pokemon } from "@/lib/fetchPokemon";
 
 interface Props {
-  allPokemon: any[];
+  allPokemon: Pokemon[];
   totalCards: number;
   currentPage: number;
   totalPages: number;
