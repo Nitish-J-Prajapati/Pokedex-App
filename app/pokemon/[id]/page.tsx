@@ -44,8 +44,9 @@ const typeColors: Record<string, string> = {
   flying: 'bg-sky-300 text-gray-900',
 };
 
-export default async function PokemonDetailPage({ params }: { params: { id: string } }) {
-  const pokemon = await fetchPokemonByIdOrName(params.id);
+export default async function PokemonDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = params ? await params : { id: '' };
+  const pokemon = await fetchPokemonByIdOrName(resolvedParams.id);
 
   if (!pokemon) {
     return (
