@@ -52,7 +52,7 @@ const typeColors: Record<string, string> = {
 export default function PokemonCard({ pokemon }: { pokemon: Pokemon }) {
   return (
     <Link href={`/pokemon/${pokemon.id}`}>
-      <Card className="bg-white border-2 border-gray-400 shadow-none hover:shadow-2xl transition cursor-pointer w-full min-w-0 h-[26rem] flex flex-col justify-between">
+      <Card className="bg-white border-2 border-gray-200 shadow-none hover:shadow-sm transition cursor-pointer w-full min-w-0 h-[26rem] flex flex-col justify-between">
         <CardContent className="p-0 flex flex-col h-full">
           {/* Top 50%: Image */}
           <div className="flex items-center justify-center bg-white" style={{ height: '50%' }}>

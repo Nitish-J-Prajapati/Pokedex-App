@@ -11,69 +11,15 @@ export interface Pokemon {
   forms: string[];
 }
 
-// Add in-memory cache for all Pokémon
-let cachedPokemon: Pokemon[] | null = null;
-let cacheTimestamp: number | null = null;
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-
 export async function fetchAllPokemon(limit = 300): Promise<Pokemon[]> {
-  const now = Date.now();
-  if (cachedPokemon && cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {
-    return cachedPokemon;
-  }
-  try {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`);
-    if (!res.ok) throw new Error(`Failed to fetch Pokémon list: ${res.statusText}`);
-    const data = await res.json();
-    const detailedPokemon = await Promise.all(
-      data.results.map(async (p: any) => {
-        try {
-          const res = await fetch(p.url);
-          if (!res.ok) throw new Error(`Failed to fetch details for ${p.name}`);
-          const details = await res.json();
-          return {
-            id: details.id,
-            name: details.name,
-            type: details.types.map((t: any) => t.type.name),
-            image: details.sprites.front_default,
-            height: details.height,
-            weight: details.weight,
-            base_experience: details.base_experience,
-            abilities: details.abilities.map((a: any) => a.ability.name),
-            stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
-            forms: details.forms.map((f: any) => f.name),
-          } as Pokemon;
-        } catch (err) {
-          console.warn(`Skipping ${p.name} due to error:`, err);
-          return null;
-        }
-      })
-    );
-    const filtered = detailedPokemon.filter((p): p is Pokemon => p !== null);
-    cachedPokemon = filtered;
-    cacheTimestamp = now;
-    return filtered;
-  } catch (err) {
-    console.error('Error fetching all Pokémon:', err);
-    return [];
-  }
-}
-
-
-export async function fetchTypes() {
-  const res = await fetch('https://pokeapi.co/api/v2/type');
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`,
+    { cache: 'force-cache', next: { revalidate: 300 } });
+  if (!res.ok) throw new Error('Failed to fetch Pokémon list');
   const data = await res.json();
-  return data.results.map((type: any) => type.name);
-}
-
-export async function fetchPaginatedPokemon(page: number, pageSize: number): Promise<{ pokemon: Pokemon[]; totalCards: number; totalPages: number }> {
-  const offset = (page - 1) * pageSize;
-  const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${pageSize}&offset=${offset}`);
-  const data = await res.json();
-
-  const pokemon = await Promise.all(
+  const detailedPokemon = await Promise.all(
     data.results.map(async (p: any) => {
-      const res = await fetch(p.url);
+      const res = await fetch(p.url, { cache: 'force-cache', next: { revalidate: 300 } });
+      if (!res.ok) return null;
       const details = await res.json();
       return {
         id: details.id,
@@ -89,32 +35,60 @@ export async function fetchPaginatedPokemon(page: number, pageSize: number): Pro
       } as Pokemon;
     })
   );
+  return detailedPokemon.filter((p): p is Pokemon => p !== null);
+}
 
+export async function fetchTypes() {
+  const res = await fetch('https://pokeapi.co/api/v2/type', { cache: 'force-cache', next: { revalidate: 300 } });
+  if (!res.ok) throw new Error('Failed to fetch types');
+  const data = await res.json();
+  return data.results.map((type: any) => type.name);
+}
+
+export async function fetchPaginatedPokemon(page: number, pageSize: number): Promise<{ pokemon: Pokemon[]; totalCards: number; totalPages: number }> {
+  const offset = (page - 1) * pageSize;
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${pageSize}&offset=${offset}`, { cache: 'force-cache', next: { revalidate: 300 } });
+  if (!res.ok) throw new Error('Failed to fetch paginated Pokémon');
+  const data = await res.json();
+  const pokemon = await Promise.all(
+    data.results.map(async (p: any) => {
+      const res = await fetch(p.url, { cache: 'force-cache', next: { revalidate: 300 } });
+      if (!res.ok) return null;
+      const details = await res.json();
+      return {
+        id: details.id,
+        name: details.name,
+        type: details.types.map((t: any) => t.type.name),
+        image: details.sprites.front_default,
+        height: details.height,
+        weight: details.weight,
+        base_experience: details.base_experience,
+        abilities: details.abilities.map((a: any) => a.ability.name),
+        stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
+        forms: details.forms.map((f: any) => f.name),
+      } as Pokemon;
+    })
+  );
+  const filtered = pokemon.filter((p): p is Pokemon => p !== null);
   const totalCards = data.count;
   const totalPages = Math.ceil(totalCards / pageSize);
-
-  return { pokemon, totalCards, totalPages };
+  return { pokemon: filtered, totalCards, totalPages };
 }
 
 export async function fetchPokemonByIdOrName(idOrName: string | number): Promise<Pokemon | null> {
-  try {
-    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`);
-    if (!res.ok) throw new Error(`Failed to fetch Pokémon: ${idOrName}`);
-    const details = await res.json();
-    return {
-      id: details.id,
-      name: details.name,
-      type: details.types.map((t: any) => t.type.name),
-      image: details.sprites.front_default,
-      height: details.height,
-      weight: details.weight,
-      base_experience: details.base_experience,
-      abilities: details.abilities.map((a: any) => a.ability.name),
-      stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
-      forms: details.forms.map((f: any) => f.name),
-    } as Pokemon;
-  } catch (err) {
-    console.error('Error fetching Pokémon:', err);
-    return null;
-  }
+  const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${idOrName}`, { cache: 'force-cache', next: { revalidate: 300 } });
+  if (!res.ok) return null;
+  const details = await res.json();
+  return {
+    id: details.id,
+    name: details.name,
+    type: details.types.map((t: any) => t.type.name),
+    image: details.sprites.front_default,
+    height: details.height,
+    weight: details.weight,
+    base_experience: details.base_experience,
+    abilities: details.abilities.map((a: any) => a.ability.name),
+    stats: details.stats.map((s: any) => ({ name: s.stat.name, value: s.base_stat })),
+    forms: details.forms.map((f: any) => f.name),
+  } as Pokemon;
 }

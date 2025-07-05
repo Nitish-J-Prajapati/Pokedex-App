@@ -34,11 +34,11 @@ function OptionSelector({ options, value, onChange }: { options: string[]; value
 
 function TypeSelector({ options, value, onChange }: { options: string[]; value: string[]; onChange: (v: string) => void }) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full px-2">
       {options.map((type) => (
         <button
           key={type}
-          className={`px-2 py-1 rounded border text-sm ${value.includes(type) ? 'bg-orange-400 text-black' : 'bg-black text-white border-white'}`}
+          className={`px-2 py-1 rounded border text-sm w-full ${value.includes(type) ? 'bg-orange-400 text-black' : 'bg-black text-white border-white'}`}
           onClick={() => onChange(type)}
         >
           {type}
@@ -144,12 +144,12 @@ const toggleType = (type: string) => {
           Filter
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full max-w-sm max-h-[90vh] p-4 overflow-y-auto">
+      <PopoverContent className="w-[400px] h-[400px] p-4">
         <div className="flex flex-col h-full gap-4 min-h-[300px]">
           {/* Top section: Left and Right side */}
           <div className="flex flex-col sm:flex-row gap-4 flex-1 min-h-0">
             {/* Left side: Filter sections */}
-            <div className="w-full sm:w-[30%] min-w-[120px] max-w-[200px] border-b sm:border-b-0 sm:border-r border-gray-500 pr-0 sm:pr-4 flex flex-row sm:flex-col gap-2 sm:gap-0 mb-4 sm:mb-0">
+            <div className="sm:basis-[30%] sm:flex-shrink-0 sm:flex-grow-0 w-full sm:w-auto min-w-[120px] max-w-[200px] border-b sm:border-b-0 sm:border-r border-gray-500 pr-0 sm:pr-4 flex flex-row sm:flex-col gap-2 sm:gap-0 mb-4 sm:mb-0">
               <div className="text-lg font-semibold mb-4 sm:mb-4 whitespace-nowrap">Filter Options</div>
               {filterSections.map((section) => (
                 <button
@@ -162,7 +162,7 @@ const toggleType = (type: string) => {
               ))}
             </div>
             {/* Right side: Dynamic options */}
-            <div className="w-full sm:w-[70%] pl-0 sm:pl-6 flex flex-col justify-start items-start min-h-[120px] max-h-[250px] overflow-y-auto">
+            <div className="sm:basis-[70%] sm:flex-shrink-0 sm:flex-grow min-w-0 w-full pl-2 sm:pl-1 pr-3 flex flex-col justify-start items-start min-h-[120px] max-h-[250px] overflow-y-auto">
               {renderRightSection()}
             </div>
           </div>
