@@ -14,6 +14,7 @@ import {
   CommandShortcut,
 } from "@/components/ui/command"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 export default function SearchBar() {
@@ -95,7 +96,16 @@ export default function SearchBar() {
         />
         <CommandList>
           {loading ? (
-            <CommandEmpty>Loading...</CommandEmpty>
+            <>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <CommandItem key={i} className="flex items-center gap-3 cursor-pointer">
+                  <Skeleton className="w-8 h-8 rounded-full" />
+                  <span className="flex-1">
+                    <Skeleton className="h-4 w-24 rounded" />
+                  </span>
+                </CommandItem>
+              ))}
+            </>
           ) : (
             <>
               <CommandEmpty>No results found.</CommandEmpty>

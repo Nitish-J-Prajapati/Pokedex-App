@@ -11,21 +11,26 @@ export interface Pokemon {
   forms: string[];
 }
 
+// Add in-memory cache for all Pokémon
+let cachedPokemon: Pokemon[] | null = null;
+let cacheTimestamp: number | null = null;
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export async function fetchAllPokemon(limit = 300): Promise<Pokemon[]> {
+  const now = Date.now();
+  if (cachedPokemon && cacheTimestamp && now - cacheTimestamp < CACHE_DURATION) {
+    return cachedPokemon;
+  }
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${limit}`);
-
     if (!res.ok) throw new Error(`Failed to fetch Pokémon list: ${res.statusText}`);
-
     const data = await res.json();
-
     const detailedPokemon = await Promise.all(
       data.results.map(async (p: any) => {
         try {
           const res = await fetch(p.url);
           if (!res.ok) throw new Error(`Failed to fetch details for ${p.name}`);
           const details = await res.json();
-
           return {
             id: details.id,
             name: details.name,
@@ -44,12 +49,13 @@ export async function fetchAllPokemon(limit = 300): Promise<Pokemon[]> {
         }
       })
     );
-
-    // Remove any null entries
-    return detailedPokemon.filter((p): p is Pokemon => p !== null);
+    const filtered = detailedPokemon.filter((p): p is Pokemon => p !== null);
+    cachedPokemon = filtered;
+    cacheTimestamp = now;
+    return filtered;
   } catch (err) {
     console.error('Error fetching all Pokémon:', err);
-    return []; // graceful fallback
+    return [];
   }
 }
 

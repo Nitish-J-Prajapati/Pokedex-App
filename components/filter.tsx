@@ -55,7 +55,7 @@ export function Filter() {
     height: '',
     weight: '',
   });
-  const [typeOptions, setTypeOptions] = useState<string[]>([]);
+const [typeOptions, setTypeOptions] = useState<string[]>([]);
   const [activeSection, setActiveSection] = useState<string>('type');
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -64,7 +64,7 @@ export function Filter() {
     fetchTypes().then(setTypeOptions);
   }, []);
 
-  const toggleType = (type: string) => {
+const toggleType = (type: string) => {
     setFilter((prev) => ({
       ...prev,
       type: prev.type.includes(type)
@@ -144,42 +144,50 @@ export function Filter() {
           Filter
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[600px] h-[400px] max-w-full">
-        <div className="flex h-full">
-          {/* Left side: Filter sections */}
-          <div className="w-[30%] min-w-[150px] max-w-[200px] border-r border-gray-500 pr-4 flex flex-col">
-            <div className="text-lg font-semibold mb-4">Filter Options</div>
-            {filterSections.map((section) => (
-              <button
-                key={section}
-                className={`text-left capitalize py-1 px-2 rounded mb-2 ${activeSection === section ? 'bg-white font-medium text-black border-2' : 'hover:bg-gray-600 text-black'}`}
-                onClick={() => setActiveSection(section)}
-              >
-                {section}
-              </button>
-            ))}
+      <PopoverContent className="w-full max-w-sm max-h-[90vh] p-4 overflow-y-auto">
+        <div className="flex flex-col h-full gap-4 min-h-[300px]">
+          {/* Top section: Left and Right side */}
+          <div className="flex flex-col sm:flex-row gap-4 flex-1 min-h-0">
+            {/* Left side: Filter sections */}
+            <div className="w-full sm:w-[30%] min-w-[120px] max-w-[200px] border-b sm:border-b-0 sm:border-r border-gray-500 pr-0 sm:pr-4 flex flex-row sm:flex-col gap-2 sm:gap-0 mb-4 sm:mb-0">
+              <div className="text-lg font-semibold mb-4 sm:mb-4 whitespace-nowrap">Filter Options</div>
+              {filterSections.map((section) => (
+                <button
+                  key={section}
+                  className={`text-left capitalize py-2 px-3 rounded mb-2 w-full h-10 flex items-center ${activeSection === section ? 'bg-white font-medium text-black border-2' : 'hover:bg-gray-600 text-black'}`}
+                  onClick={() => setActiveSection(section)}
+                >
+                  {section}
+                </button>
+              ))}
+            </div>
+            {/* Right side: Dynamic options */}
+            <div className="w-full sm:w-[70%] pl-0 sm:pl-6 flex flex-col justify-start items-start min-h-[120px] max-h-[250px] overflow-y-auto">
+              {renderRightSection()}
+            </div>
           </div>
-          {/* Right side: Dynamic options */}
-          <div className="w-[70%] pl-6 flex flex-col justify-start items-start">
-            {renderRightSection()}
+          
+          {/* Bottom section: Buttons */}
+          <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t border-gray-200">
+            <Button
+              onClick={handleApply}
+              className="flex-1 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Apply Filter
+            </Button>
+            <Button
+              onClick={handleRemoveFilters}
+              className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+            >
+              Clear Filter
+            </Button>
+            <Button
+              onClick={() => setOpen(false)}
+              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white"
+            >
+              Close
+            </Button>
           </div>
-        </div>
-        <div className="flex justify-end gap-2 mt-6">
-          <button
-            onClick={handleRemoveFilters}
-            className="bg-gray-100 text-gray-800 px-3 py-1 rounded border border-gray-400 hover:bg-gray-300"
-          >
-            Remove Filters
-          </button>
-          <button onClick={() => setOpen(false)} className="bg-gray-300 border border-gray-400 hover:bg-gray-500 px-3 py-1 rounded">
-            Close
-          </button>
-          <button
-            onClick={handleApply}
-            className="bg-indigo-500 border border-indigo-950 hover:bg-indigo-800 text-white px-3 py-1 rounded"
-          >
-            Apply
-          </button>
         </div>
       </PopoverContent>
     </Popover>

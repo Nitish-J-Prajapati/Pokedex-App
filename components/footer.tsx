@@ -43,51 +43,53 @@ export default function Footer({ currentPage, totalPages, searchParams }: Footer
   };
 
   return (
-    <footer className="px-6 py-2 flex justify-center items-center bg-white border-t">
-      <Pagination>
-        <PaginationContent>
-          <PaginationItem>
-            <PaginationPrevious
-              href={buildPageHref(Math.max(1, currentPage - 1))}
-              aria-disabled={currentPage === 1}
-            />
-          </PaginationItem>
-          {pageNumbers[0] > 1 && (
-            <>
-          <PaginationItem>
-                <PaginationLink href={buildPageHref(1)}>1</PaginationLink>
-          </PaginationItem>
-              {pageNumbers[0] > 2 && <PaginationEllipsis />}
-            </>
-          )}
-          {pageNumbers.map((page) => (
-            <PaginationItem key={page}>
-              <PaginationLink
-                href={buildPageHref(page)}
-                isActive={page === currentPage}
-              >
-                {page}
-            </PaginationLink>
-          </PaginationItem>
-          ))}
-          {pageNumbers[pageNumbers.length - 1] < totalPages && (
-            <>
-              {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <PaginationEllipsis />}
-          <PaginationItem>
-                <PaginationLink href={buildPageHref(totalPages)}>
-                  {totalPages}
-                </PaginationLink>
-          </PaginationItem>
-            </>
-          )}
-          <PaginationItem>
-            <PaginationNext
-              href={buildPageHref(Math.min(totalPages, currentPage + 1))}
-              aria-disabled={currentPage === totalPages}
-            />
-          </PaginationItem>
-        </PaginationContent>
-      </Pagination>
+    <footer className="px-4 sm:px-6 py-2 flex justify-center items-center bg-white border-t w-full">
+      <div className="w-full max-w-screen-xl mx-auto">
+        <Pagination>
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                href={buildPageHref(Math.max(1, currentPage - 1))}
+                aria-disabled={currentPage === 1}
+              />
+            </PaginationItem>
+            {pageNumbers[0] > 1 && (
+              <>
+            <PaginationItem>
+                  <PaginationLink href={buildPageHref(1)}>1</PaginationLink>
+            </PaginationItem>
+                {pageNumbers[0] > 2 && <PaginationEllipsis />}
+              </>
+            )}
+            {pageNumbers.map((page) => (
+              <PaginationItem key={page}>
+                <PaginationLink
+                  href={buildPageHref(page)}
+                  isActive={page === currentPage}
+                >
+                  {page}
+              </PaginationLink>
+            </PaginationItem>
+            ))}
+            {pageNumbers[pageNumbers.length - 1] < totalPages && (
+              <>
+                {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && <PaginationEllipsis />}
+            <PaginationItem>
+                  <PaginationLink href={buildPageHref(totalPages)}>
+                    {totalPages}
+                  </PaginationLink>
+            </PaginationItem>
+              </>
+            )}
+            <PaginationItem>
+              <PaginationNext
+                href={buildPageHref(Math.min(totalPages, currentPage + 1))}
+                aria-disabled={currentPage === totalPages}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
     </footer>
   );
 }
