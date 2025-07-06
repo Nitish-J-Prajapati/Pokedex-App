@@ -48,13 +48,13 @@ function TypeSelector({ options, value, onChange }: { options: string[]; value: 
   );
 }
 
-export function Filter() {
+export function Filter({ filter, setFilter, onApply, onClear }: {
+  filter: { type: string[]; height: string; weight: string; search?: string };
+  setFilter: (newFilter: Partial<{ type: string[]; height: string; weight: string; search?: string }>) => void;
+  onApply: () => void;
+  onClear: () => void;
+}) {
   const [open, setOpen] = useState(false);
-  const [filter, setFilter] = useState<{ type: string[]; height: string; weight: string; }>({
-    type: [],
-    height: '',
-    weight: '',
-  });
   const [typeOptions, setTypeOptions] = useState<string[]>([]);
   const [activeSection, setActiveSection] = useState<string>('type');
   const router = useRouter();
@@ -65,16 +65,15 @@ export function Filter() {
   }, []);
 
   const toggleType = (type: string) => {
-    setFilter((prev) => ({
-      ...prev,
-      type: prev.type.includes(type)
-        ? prev.type.filter((t) => t !== type)
-        : [...prev.type, type],
-    }));
+    setFilter({
+      type: filter.type.includes(type)
+        ? filter.type.filter((t) => t !== type)
+        : [...filter.type, type],
+    });
   };
 
   const updateFilter = (field: string, value: string) => {
-    setFilter((prev) => ({ ...prev, [field]: value }));
+    setFilter({ [field]: value });
   };
 
   const renderRightSection = () => {
@@ -107,30 +106,12 @@ export function Filter() {
 
   const handleApply = () => {
     setOpen(false);
-    // Build new URLSearchParams
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete("page"); // Reset to first page on filter
-    Object.entries(filter).forEach(([key, value]) => {
-      params.delete(key);
-      if (Array.isArray(value)) {
-        value.forEach((v) => v && params.append(key, v));
-      } else if (value) {
-        params.set(key, value);
-      }
-    });
-    router.push(`?${params.toString()}`);
+    if (onApply) onApply();
   };
 
   const handleRemoveFilters = () => {
     setOpen(false);
-    // Remove all filter params from URL
-    const params = new URLSearchParams(searchParams.toString());
-    params.delete('type');
-    params.delete('height');
-    params.delete('weight');
-    params.delete('page'); // Reset to first page
-    router.push(`?${params.toString()}`);
-    setFilter({ type: [], height: '', weight: '' });
+    if (onClear) onClear();
   };
 
   return (
@@ -147,21 +128,17 @@ export function Filter() {
       <PopoverContent
         className="w-[400px] h-[400px] p-0 flex flex-col
           sm:w-[400px] sm:h-[400px] sm:rounded-xl
-          w-screen h-[90vh] left-0 top-0 rounded-none max-w-none max-h-none flex-col h-[450px]
-        "
+          w-screen h-[90vh] left-0 top-0 rounded-none max-w-none max-h-none flex-col h-[450px]"
         sideOffset={8}
         style={{}}
       >
-        {/* Top section: label + close button */}
         <div className="flex items-center justify-between border-b px-4 py-3 bg-white z-10">
           <div className="text-lg font-semibold whitespace-nowrap">Filter Options</div>
           <Button size="icon" variant="ghost" className="ml-2" onClick={() => setOpen(false)} aria-label="Close filter">
             <span aria-hidden>×</span>
           </Button>
         </div>
-        {/* Middle section: filter sections + options, scrollable and flex-1 */}
         <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 flex flex-col sm:flex-row gap-4">
-          {/* Sidebar: horizontal on mobile, vertical on desktop */}
           <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto sm:basis-[30%] flex-shrink-0 flex-grow-0 min-w-0 sm:min-w-[100px] sm:max-w-[140px]">
             {filterSections.map((section) => (
               <button
@@ -173,12 +150,10 @@ export function Filter() {
               </button>
             ))}
           </div>
-          {/* Right side: Dynamic options */}
           <div className="w-full sm:basis-[70%] flex-shrink-0 flex-grow min-w-0 pl-0 sm:pl-2 pr-0 sm:pr-2 flex flex-col justify-start items-start min-h-[120px] max-h-[250px] sm:max-h-[250px] overflow-y-auto">
             {renderRightSection()}
           </div>
         </div>
-        {/* Bottom section: buttons, stick to bottom */}
         <div className="flex flex-col sm:flex-row gap-2 border-t px-4 py-3 bg-white z-10">
           <Button
             onClick={handleApply}

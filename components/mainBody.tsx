@@ -4,17 +4,11 @@ import type { Pokemon } from "@/lib/fetchPokemon";
 interface Props {
   allPokemon: Pokemon[];
   totalCards: number;
-  currentPage: number;
-  totalPages: number;
-  searchParams: { [key: string]: string | string[] };
 }
 
 export default function MainBody({
   allPokemon,
   totalCards,
-  currentPage,
-  totalPages,
-  searchParams,
 }: Props) {
   return (
     <main className="flex-grow overflow-auto">
